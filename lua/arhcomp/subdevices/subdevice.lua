@@ -42,12 +42,27 @@ if SERVER then
             table.ForceInsert(entity.SubDevices[sdtypename], subdev)
     end
 
-    function Lib.InitHost(entity)
+    function Lib.HostInit(entity)
         if not IsValid(entity) or entity:GetClass() ~= "arhcomp_device" then
             return nil
         end
 
         entity.SubDevices = {}
+    end
+
+    function Lib.HostRemove(entity)
+        local subdevs = entity.SubDevices
+
+        timer.Simple(0, function() -- https://github.com/Facepunch/garrysmod-issues/issues/4675
+            if IsValid(entity) then return end
+
+            for sdtype, sdevs in pairs(subdevs) do
+                for i, sdev in ipairs(sdevs) do
+                    sdev:OnRemoved()
+                end
+            end
+            
+        end)
     end
 
     function Lib.GetAll(entity)

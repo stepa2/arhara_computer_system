@@ -6,7 +6,7 @@ ENT.Category = "ArhComp"
 
 if SERVER then
     function ENT:InitFromConfig(config)
-        ArhComp.SubDevice.InitHost(self)
+        ArhComp.SubDevice.HostInit(self)
 
         self.SpawnConfig = config
         self:SetModel(config.Model)
@@ -33,9 +33,5 @@ function ENT:Use(activator)
 end
 
 function ENT:OnRemove()
- timer.Simple( 0, function()
-        if not IsValid( self ) then
-            -- TODO
-        end
-    end)
+    ArhComp.SubDevice.HostRemove(self)
 end
