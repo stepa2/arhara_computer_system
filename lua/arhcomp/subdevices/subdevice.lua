@@ -69,7 +69,7 @@ if SERVER then
     function Lib.Create(sdtypename, name, entity, params)
         local sdtype = SubDeviceTypes[sdtypename]
 
-        local subdev = setmetatable({}, sdtype)
+        local subdev = setmetatable({ Device = entity }, sdtype)
 
         subdev:OnCreated(params)
 
