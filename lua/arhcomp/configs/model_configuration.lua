@@ -45,8 +45,11 @@ RegisterDevice(bit.bor(
         PrimaryCapability = ArhComp.DeviceCapabilities.COMPUTER,
         Model = "models/props_combine/combine_interface002.mdl",
         SubDevices = {
-            {
+            keyboard = {
                 Type = "keyboard"
+            },
+            screen = {
+                Type = "screen"
             }
         }
 })

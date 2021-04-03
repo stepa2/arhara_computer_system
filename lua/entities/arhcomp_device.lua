@@ -11,9 +11,19 @@ if SERVER then
         self.SpawnConfig = config
         self:SetModel(config.Model)
 
-        for i, sdconfig in ipairs(config.SubDevices) do
-            ArhComp.SubDevice.Create(sdconfig.Type, self, sdconfig)
+        ArhComp.SubDevice.HostConfigurateDevs(self, config.SubDevices)
+    end
+
+    function ENT:Use(activator)
+        local keyboard = ArhComp.SubDevice.GetSingleOfType(self, "keyboard")
+    
+        if keyboard then
+            keyboard:OnHostUsed(activator)
         end
+    end
+    
+    function ENT:OnRemove()
+        ArhComp.SubDevice.HostRemove(self)
     end
 end
 
@@ -24,14 +34,3 @@ function ENT:Initialize()
     end
 end
 
-function ENT:Use(activator)
-    local keyboard = ArhComp.SubDevice.GetSingleOfType(self, "keyboard")
-
-    if keyboard then
-        keyboard:OnHostUsed(activator)
-    end
-end
-
-function ENT:OnRemove()
-    ArhComp.SubDevice.HostRemove(self)
-end

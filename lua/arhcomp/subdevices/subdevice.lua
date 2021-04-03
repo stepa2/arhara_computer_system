@@ -25,22 +25,7 @@ ArhComp.SubDevice = Lib
 if SERVER then
     local SubDeviceTypes = {}
 
-    function Lib.RegisterType(sdtypename, data)
-        data.__index = data
-
-        SubDeviceTypes[sdtypename] = data
-    end
-
-    function Lib.Create(sdtypename, entity, params)
-        local sdtype = SubDeviceTypes[sdtypename]
-
-        local subdev = setmetatable({}, sdtype)
-
-        subdev:OnCreated(params)
-
-        entity.SubDevices[sdtypename] =
-            table.ForceInsert(entity.SubDevices[sdtypename], subdev)
-    end
+-- Device (subdevice host) functions
 
     function Lib.HostInit(entity)
         if not IsValid(entity) or entity:GetClass() ~= "arhcomp_device" then
@@ -50,6 +35,13 @@ if SERVER then
         entity.SubDevices = {}
     end
 
+    function Lib.HostConfigurateDevs(entity, sdconfigs)
+        for name, sdconfig in pairs(sdconfigs) do
+            Lib.Create(sdconfig.Type, name, entity, sdconfig)
+        end
+
+    end
+
     function Lib.HostRemove(entity)
         local subdevs = entity.SubDevices
 
@@ -57,12 +49,32 @@ if SERVER then
             if IsValid(entity) then return end
 
             for sdtype, sdevs in pairs(subdevs) do
-                for i, sdev in ipairs(sdevs) do
+                for name, sdev in pairs(sdevs) do
                     sdev:OnRemoved()
                 end
             end
-            
         end)
+    end
+
+-- Subdevice type functions
+
+    function Lib.RegisterType(sdtypename, data)
+        data.__index = data
+
+        SubDeviceTypes[sdtypename] = data
+    end
+
+-- Subdevice functions
+
+    function Lib.Create(sdtypename, name, entity, params)
+        local sdtype = SubDeviceTypes[sdtypename]
+
+        local subdev = setmetatable({}, sdtype)
+
+        subdev:OnCreated(params)
+
+        entity.SubDevices[sdtypename] = entity.SubDevices[sdtypename] or {}
+        entity.SubDevices[sdtypename][name] = subdev
     end
 
     function Lib.GetAll(entity)
@@ -73,14 +85,25 @@ if SERVER then
         return entity.SubDevices
     end
 
-    function Lib.GetAllOfType(entity, sdtypename)
+    function Lib.GetAllByType(entity, sdtypename)
         return entity.SubDevices[sdtypename] or {}
     end
 
-    function Lib.GetSingleOfType(entity, sdtypename)
+    function Lib.GetByTypeAndName(entity, sdtypename, sdname)
+        return Lib.GetAllByType(entity, sdtypename)[sdname]
+    end
+
+    function Lib.GetSingleByType(entity, sdtypename)
         local all = Lib.GetAllOfType(entity, sdtypename)
 
-        return #all == 1 and all[1] or nil
+        local k1, v1 = next(all) -- First key-value as would pairs(all) return
+        local k2, v2 = next(all, k1) -- Second key-value as would pairs(all) return
+
+        if k1 ~= nil and k2 == nil then -- Return value only if first key exists and second does not
+            return v1
+        else
+            return nil
+        end
     end
 
 end
