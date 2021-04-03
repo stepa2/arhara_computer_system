@@ -2,6 +2,7 @@ AddCSLuaFile()
 
 ENT.Type = "anim"
 ENT.Base = "base_anim"
+ENT.AutomaticFrameAdvance = true
 ENT.Category = "ArhComp"
 
 if SERVER then
@@ -24,6 +25,16 @@ if SERVER then
     
     function ENT:OnRemove()
         ArhComp.SubDevice.HostRemove(self)
+    end
+
+    function ENT:Think()
+        for _, subdevs in pairs(ArhComp.SubDevice.GetAll(self)) do
+            for _, subdev in pairs(subdevs) do
+                if subdev.OnThink then
+                    subdev.OnThink()
+                end
+            end
+        end
     end
 end
 
