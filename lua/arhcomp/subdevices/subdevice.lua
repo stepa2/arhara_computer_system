@@ -93,8 +93,12 @@ if SERVER then
         return Lib.GetAllByType(entity, sdtypename)[sdname]
     end
 
+    function Lib.HasAnyByType(entity, sdtypename)
+        return entity.SubDevices[sdtypename] ~= nil
+    end
+
     function Lib.GetSingleByType(entity, sdtypename)
-        local all = Lib.GetAllOfType(entity, sdtypename)
+        local all = Lib.GetAllByType(entity, sdtypename)
 
         local k1, v1 = next(all) -- First key-value as would pairs(all) return
         local k2, v2 = next(all, k1) -- Second key-value as would pairs(all) return

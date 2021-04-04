@@ -14,16 +14,6 @@ local CapabilityToList = {
 
 local DeviceConfigs = {}
 
-local function RegisterDevice(capabilities, data)
-    for cap, listname in pairs(CapabilityToList) do
-        if bit.band(capabilities, cap) == cap then
-            list.Add(listname, data)
-        end
-    end
-
-    DeviceConfigs[data.Name] = data
-end
-
 function ArhComp.GetDeviceConfigsByCapability(capability)
     local listname = CapabilityToList[capability]
 
@@ -34,23 +24,17 @@ function ArhComp.GetDeviceConfigsByName(name)
     return DeviceConfigs[name]
 end
 
--- Devices go here
+function RegisterDevice(capabilities, data)
+    for cap, listname in pairs(CapabilityToList) do
+        if bit.band(capabilities, cap) == cap then
+            list.Add(listname, data)
+        end
+    end
 
-RegisterDevice(bit.bor(
-    ArhComp.DeviceCapabilities.COMPUTER,
-    ArhComp.DeviceCapabilities.MONITOR,
-    ArhComp.DeviceCapabilities.KEYBOARD),
-    {
-        Name = "combine_interface_mid",
-        PrimaryCapability = ArhComp.DeviceCapabilities.COMPUTER,
-        Model = "models/props_combine/combine_interface002.mdl",
-        SubDevices = {
-            keyboard = {
-                Type = "keyboard"
-            },
-            screen = {
-                Type = "screen"
-            }
-        }
-})
+    DeviceConfigs[data.Name] = data
+end
 
+AddCSLuaFile("model_configuration_db.lua")
+include("model_configuration_db.lua")
+
+RegisterDevice = nil

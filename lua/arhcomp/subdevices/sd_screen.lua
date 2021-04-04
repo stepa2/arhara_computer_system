@@ -9,18 +9,19 @@ if SERVER then
         AllScreens[self.AllScreensI] = self
 
         self.Position = params.Position
-        self.Normal = params.Normalize
+        self.Normal = params.Normal
         self.Size = params.Size
+        self.Opaque = params.Opaque
 
+        self.Surface = ArhComp.RenderLib.CreateSurface(self.Device, params.SurfaceTemplate)
     end
 
     function SUBDEV:OnRemoved()
         AllScreens[self.AllScreensI] = nil
+        self.Surface:Free()
     end
 
-    function SUBDEV:RenderDataDelta()
 
-    end
 
     ArhComp.SubDevice.RegisterType("screen", SUBDEV)
 end

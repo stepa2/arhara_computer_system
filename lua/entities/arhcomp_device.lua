@@ -16,7 +16,7 @@ if SERVER then
     end
 
     function ENT:Use(activator)
-        local keyboard = ArhComp.SubDevice.GetSingleOfType(self, "keyboard")
+        local keyboard = ArhComp.SubDevice.GetSingleByType(self, "keyboard")
     
         if keyboard then
             keyboard:OnHostUsed(activator)
