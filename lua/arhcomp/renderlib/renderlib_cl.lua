@@ -117,11 +117,9 @@ hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", funct
         local sizeY = surf.SurfSize.Y * ratio
 
         cam.Start3D2D(pos, ang, scale)
-            surface.SetDrawColor(255,0,0,255)
+            surface.SetDrawColor(255,255,255,255)
+            surface.SetMaterial(surf.DrawSurface.Material)
             surface.DrawRect(0,0, sizeX, sizeY)
-
-            draw.DrawText("Hello, computers!\n Hello again!", "DermaLarge", 8,8, ColorGreen)
-
         cam.End3D2D()
     end
 end)

@@ -27,7 +27,8 @@ function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
         Template = template,
         Index = index,
         ObserversRev = {},
-        Params = params
+        Params = params,
+        RenderObjects = {},
     }, {__index = SURF})
 
     LiveSurfaces[index] = surf
@@ -37,17 +38,7 @@ function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
     return surf
 end
 
-function SURF:Free()
-    LiveSurfaces[self.Index] = nil
 
-    LiveRenderDevices[self.Device][self.Index] = nil
-    
-    if table.IsEmpty(LiveRenderDevices[self.Device]) then
-        LiveRenderDevices[self.Device] = nil
-    end
-
-    self:UpdateObservers({})
-end
 
 function SURF:UpdateObservers(plysRev, force)
     local combined = {}
@@ -99,18 +90,6 @@ function SURF:UpdateObservers(plysRev, force)
     self.ObserversRev = plysRev
 end
 
---[[
-function SURF:SendDrawData(ply)
-    net.Start("ArhComp_SurfaceUpdate")
-        net.WriteUInt(self.Index, 24) -- Max 16777215
-        net.WriteBit(true) -- IsVisible
-
-        -- TODO:
-    net.Send(ply)
-end
-]]
-
-
 hook.Add("Think", "ArhComp_Surface_Think", function()
     local devices = LiveRenderDevices
     local players = player.GetHumans()
@@ -143,3 +122,51 @@ hook.Add("Think", "ArhComp_Surface_Think", function()
     end
 
 end)
+
+function SURF:RenderObjectAdd(type, params)
+    local index = #RenderObjects + 1
+
+    local data = {
+        Type = type,
+        Params = params,
+        Index = index,
+        Dirty = true, -- Needs networking
+        ToRemove = false -- Needs removal
+    }
+
+    self.RenderObjects[index] = data
+
+    return data
+end
+
+function SURF:RenderObjectNetwork(object_index)
+    if istable(object_index) then
+        object_index = object_index.Index
+    end
+
+    local object = self.RenderObjects[object_index]\
+    object.Dirty = true
+end
+
+function SURF:RenderObjectRemove(object_index)
+    if istable(object_index) then
+        object_index = object_index.Index
+    end
+
+    local object = self.RenderObjects[object_index]
+    object.Dirty = true
+    object.ToRemove = true
+
+end
+
+function SURF:Free()
+    LiveSurfaces[self.Index] = nil
+
+    LiveRenderDevices[self.Device][self.Index] = nil
+
+    if table.IsEmpty(LiveRenderDevices[self.Device]) then
+        LiveRenderDevices[self.Device] = nil
+    end
+
+    self:UpdateObservers({})
+end
