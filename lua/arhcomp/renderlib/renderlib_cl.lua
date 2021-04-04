@@ -10,6 +10,7 @@ end
 
 local AllocatedSurfaces = {}
 
+local ServerSurfaces = {}
 
 local function AllocateSurfaceImpl(index, templateName, size)
     local template = STIndexToSurfTemp[templateName]
@@ -57,8 +58,42 @@ local function GetOrAllocateSurface(templateName, size)
     return AllocateSurface(templateName, size)
 end
 
+net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
+    local index = net.ReadUInt(24)
+    local is_visible = net.ReadBool()
+
+    local surf = ServerSurfaces[index]
+
+    if is_visible then
+        assert(surf == nil)
+
+        surf = {}
+        surf.Device = net.ReadEntity()
+        surf.Pos = net.ReadVector()
+        surf.Angle = net.ReadNormal():Angle()
+        surf.SurfSize = {
+            X = net.ReadUInt(12),
+            Y = net.ReadUInt(12)
+        }
+        surf.DrawSurfTemplateName = net.ReadString()
+
+        local drawSurf = AllocateSurface(surf.DrawSurfTemplateName, surf.SurfSize)
+        drawSurf.Used = true
+
+        surf.DrawSurface = drawSurf
+    else
+        assert(surf ~= nil)
+        surf.DrawSurface.Used = false
+    end
+
+    ServerSurfaces[index] = surf
+end)
+
 hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", function(is_depth, is_skybox)
     if is_depth or is_skybox then return end
 
+    for surf_i, surf in pairs(ServerSurfaces) do
+        
+    end
     
 end)

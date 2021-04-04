@@ -8,12 +8,12 @@ if SERVER then
 
         AllScreens[self.AllScreensI] = self
 
-        self.Position = params.Position
-        self.Normal = params.Normal
-        self.Size = params.Size
-        self.Opaque = params.Opaque
-
-        self.Surface = ArhComp.RenderLib.CreateSurface(self.Device, params.SurfaceTemplate)
+        self.Surface = ArhComp.RenderLib.CreateSurface(self.Device, params.SurfaceTemplate, {
+            Pos = params.Position,
+            Normal = params.Normal,
+            Opaque = params.Opaque,
+            SurfSize = params.Size 
+        })
     end
 
     function SUBDEV:OnRemoved()

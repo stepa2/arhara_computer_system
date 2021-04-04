@@ -54,7 +54,6 @@ RegisterDevice(bit.bor(
                 Position = Vector(0,0, 64),
                 Normal = Vector(0,0, 1),
                 Size = { X = 512, Y = 512 },
-                Opaque = true
             }
         }
 })
