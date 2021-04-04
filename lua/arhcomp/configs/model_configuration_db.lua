@@ -8,7 +8,7 @@ local SurfTemp_ScreenCombineSolid = ArhComp.RenderLib.RegisterSurfaceTemplate(
         ["$mod2x"] = 1,
 
         Proxies = {
-            Sine = {
+            --[[Sine = {
                 resultVar = "$color[0]",
                 sineperiod = 0.2,
                 sinemin = 0.99,
@@ -25,7 +25,7 @@ local SurfTemp_ScreenCombineSolid = ArhComp.RenderLib.RegisterSurfaceTemplate(
                 sineperiod = 0.1,
                 sinemin = 0.99,
                 sinemax = 1
-            },
+            },]]
             TextureScroll = {
                 texturescrollvar = "$texture2transform",
                 texturescrollrate = 1,
