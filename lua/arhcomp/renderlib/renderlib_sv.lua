@@ -11,13 +11,20 @@ local LiveRenderDevices = {}
 
 local SURF = {}
 
-function ArhComp.RenderLib.CreateSurface(device, templateName, params)
+function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
     local index = #LiveSurfaces + 1
+
+    local template
+
+    if istable(templateIn) then
+        template = templateIn
+    else
+        template = ArhComp.RenderLib.GetTemplateByName(templateIn)
+    end
 
     local surf = setmetatable({
         Device = device,
-        TemplateName = templateName,
-        Template = ArhComp.RenderLib.GetTemplateByName(templateName),
+        Template = template,
         Index = index,
         ObserversRev = {},
         Params = params
@@ -39,18 +46,30 @@ function SURF:Free()
         LiveRenderDevices[self.Device] = nil
     end
 
+    self:UpdateObservers({})
 end
 
-function SURF:UpdateObservers(plysRev)
-    local function indexFn(self2, i)
-        return plysRev[i] or self.ObserversRev[i]
+function SURF:UpdateObservers(plysRev, force)
+    local combined = {}
+
+    for ply, _ in pairs(self.ObserversRev) do
+        combined[ply] = { Prev = true }
     end
 
-    for ply, _ in pairs(setmetatable({}, {__index = indexFn})) do
-        local prevHas = self.ObserversRev[ply] or false
-        local curHas = plysRev[i] or false
+    for ply, _ in pairs(plysRev) do
+        combined[ply] = combined[ply] or {}
+        combined[ply].Cur = true
+    end
+
+    
+
+    for ply, data in pairs(combined) do
+        local prevHas = data.Prev or false
+        local curHas = data.Cur or false
 
         if prevHas ~= curHas then
+            print("DeltaVis", prevHas, curHas)
+
             net.Start("ArhComp_SurfaceVisibilityUpdate")
                 net.WriteUInt(self.Index, 24) -- Max 16777215
                 net.WriteBool(curHas)
@@ -58,10 +77,11 @@ function SURF:UpdateObservers(plysRev)
                 if curHas then
                     net.WriteEntity(self.Device)
                     net.WriteVector(self.Params.Pos)
-                    net.WriteNormal(self.Params.Normal)
-                    net.WriteUInt(self.Params.SurfSize.X, 12)
-                    net.WriteUInt(self.Params.SurfSize.Y, 12)
-                    net.WriteString(TemplateName)
+                    net.WriteAngle(self.Params.Angle)
+                    net.WriteUInt(self.Params.SurfSize.X*100, 16)
+                    net.WriteUInt(self.Params.SurfSize.Y*100, 16)
+                    net.WriteUInt(self.Params.SurfPixelPerWorld, 8)
+                    net.WriteString(self.Template.Name)
                 end
             net.Send(ply)
         end
@@ -75,6 +95,8 @@ function SURF:UpdateObservers(plysRev)
         end
 
     end
+
+    self.ObserversRev = plysRev
 end
 
 --[[
@@ -103,20 +125,21 @@ hook.Add("Think", "ArhComp_Surface_Think", function()
         local plyPos = ply:GetPos()
 
         for device, surfaces in pairs(devices) do
-            if IsValid(device) 
-                and (plyPos:DistToSqr(device:GetPos()) <= maxDistSqr) 
+
+            if IsValid(device)
+                and (plyPos:DistToSqr(device:GetPos()) <= maxDistSqr)
                 and ply:TestPVS(device) then
 
                 for isurf, surf in pairs(surfaces) do
                     surfacesToPlys[surf] = surfacesToPlys[surf] or {}
-                    surfacesToPlys[surf][ply] = true 
+                    surfacesToPlys[surf][ply] = true
                 end
             end
         end
     end
 
-    for surf, plysRev in pairs(surfacesToPlys) do
-        surf:UpdateObservers(plysRev)
+    for surfi, surf in pairs(LiveSurfaces) do
+        surf:UpdateObservers(surfacesToPlys[surf] or {})
     end
 
 end)

@@ -10,9 +10,10 @@ if SERVER then
 
         self.Surface = ArhComp.RenderLib.CreateSurface(self.Device, params.SurfaceTemplate, {
             Pos = params.Position,
-            Normal = params.Normal,
+            Angle = params.Angle,
             Opaque = params.Opaque,
-            SurfSize = params.Size 
+            SurfSize = params.Size,
+            SurfPixelPerWorld = params.SurfPixelPerWorld
         })
     end
 

@@ -232,7 +232,8 @@ function ArhComp.RenderLib.RegisterSurfaceTemplate(templateName, shader, opaque,
    local template = {
       Shader = shader,
       MaterialTableFactory = matFactory,
-      Opaque = opaque
+      Opaque = opaque,
+      Name = templateName
    }
 
    SurfaceTemplates[templateName] = template

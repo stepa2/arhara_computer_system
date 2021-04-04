@@ -5,7 +5,7 @@ local STIndexToSurfTemp = {}
 
 function ArhComp.RenderLib.ImplCl_RegisterSurfaceTemplate(templateName, template)
     SurfTempToSTIndex[template] = templateName
-    SurfTempToSTIndex[templateName] = template
+    STIndexToSurfTemp[templateName] = template
 end
 
 local AllocatedSurfaces = {}
@@ -20,7 +20,7 @@ local function AllocateSurfaceImpl(index, templateName, size)
 
     local rt = GetRenderTargetEx(rtName,
         size.X, size.Y, RT_SIZE_NO_CHANGE, MATERIAL_RT_DEPTH_NONE, 
-        bit.bor(TEXTUREFLAGS_ANISOTROPIC, Either(opaque, 0, TEXTUREFLAGS_EIGHTBITALPHA), TEXTUREFLAGS_RENDERTARGET),
+        bit.bor(16, Either(opaque, 0, 8192), 32768),
         0, Either(opaque, IMAGE_FORMAT_RGB888, IMAGE_FORMAT_RGBA8888)) -- rtFlags, imageFormat
 
     local shader            = template.Shader
@@ -70,30 +70,58 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
         surf = {}
         surf.Device = net.ReadEntity()
         surf.Pos = net.ReadVector()
-        surf.Angle = net.ReadNormal():Angle()
+        surf.Angle = net.ReadAngle()
         surf.SurfSize = {
-            X = net.ReadUInt(12),
-            Y = net.ReadUInt(12)
+            X = net.ReadUInt(16)/100,
+            Y = net.ReadUInt(16)/100
         }
+        surf.SurfPixelPerWorld = net.ReadUInt(8)
+        surf.SurfPixelScale = 1 / surf.SurfPixelPerWorld
+
         surf.DrawSurfTemplateName = net.ReadString()
 
         local drawSurf = AllocateSurface(surf.DrawSurfTemplateName, surf.SurfSize)
         drawSurf.Used = true
 
         surf.DrawSurface = drawSurf
+
+        PrintTable(surf)
     else
         assert(surf ~= nil)
         surf.DrawSurface.Used = false
+        surf = nil
     end
 
     ServerSurfaces[index] = surf
 end)
 
+local ColorRed = Color(255,0,0)
+local ColorGreen = Color(0,255,0)
+local ColorBlue = Color(0,0,255)
+
 hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", function(is_depth, is_skybox)
-    if is_depth or is_skybox then return end
+    if --[[is_depth or]] is_skybox then return end
+
 
     for surf_i, surf in pairs(ServerSurfaces) do
-        
+        local ent = surf.Device
+
+        if not IsValid(ent) then continue end
+
+        local pos = ent:LocalToWorld(surf.Pos)
+        local ang = ent:LocalToWorldAngles(surf.Angle)
+        local ratio = surf.SurfPixelPerWorld
+        local scale = surf.SurfPixelScale
+
+        local sizeX = surf.SurfSize.X * ratio
+        local sizeY = surf.SurfSize.Y * ratio
+
+        cam.Start3D2D(pos, ang, scale)
+            surface.SetDrawColor(255,0,0,255)
+            surface.DrawRect(0,0, sizeX, sizeY)
+
+            draw.DrawText("Hello, computers!\n Hello again!", "DermaLarge", 8,8, ColorGreen)
+
+        cam.End3D2D()
     end
-    
 end)

@@ -24,7 +24,7 @@ function ArhComp.GetDeviceConfigsByName(name)
     return DeviceConfigs[name]
 end
 
-function RegisterDevice(capabilities, data)
+function ArhComp.RegisterDevice(capabilities, data)
     for cap, listname in pairs(CapabilityToList) do
         if bit.band(capabilities, cap) == cap then
             list.Add(listname, data)
@@ -36,5 +36,3 @@ end
 
 AddCSLuaFile("model_configuration_db.lua")
 include("model_configuration_db.lua")
-
-RegisterDevice = nil
