@@ -59,8 +59,6 @@ function SURF:UpdateObservers(plysRev, force)
         local curHas = data.Cur or false
 
         if prevHas ~= curHas then
-            print("DeltaVis", prevHas, curHas)
-
             net.Start("ArhComp_SurfaceVisibilityUpdate")
                 net.WriteUInt(self.Index, 24) -- Max 16777215
                 net.WriteBool(curHas)
@@ -124,7 +122,7 @@ hook.Add("Think", "ArhComp_Surface_Think", function()
 end)
 
 function SURF:RenderObjectAdd(type, params)
-    local index = #RenderObjects + 1
+    local index = #self.RenderObjects + 1
 
     local data = {
         Type = type,
@@ -139,12 +137,12 @@ function SURF:RenderObjectAdd(type, params)
     return data
 end
 
-function SURF:RenderObjectNetwork(object_index)
+function SURF:RenderObjectUpdated(object_index)
     if istable(object_index) then
         object_index = object_index.Index
     end
 
-    local object = self.RenderObjects[object_index]\
+    local object = self.RenderObjects[object_index]
     object.Dirty = true
 end
 
