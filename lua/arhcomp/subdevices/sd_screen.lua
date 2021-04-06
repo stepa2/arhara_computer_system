@@ -1,13 +1,8 @@
 if SERVER then
-    local AllScreens = {}
 
     local SUBDEV = {}
 
     function SUBDEV:OnCreated(params)
-        self.AllScreensI = #AllScreens + 1
-
-        AllScreens[self.AllScreensI] = self
-
         self.Surface = ArhComp.RenderLib.CreateSurface(self.Device, params.SurfaceTemplate, {
             Pos = params.Position,
             Angle = params.Angle,
@@ -15,14 +10,25 @@ if SERVER then
             SurfSize = params.Size,
             SurfPixelPerWorld = params.SurfPixelPerWorld
         })
+
+        PrintTable(self.Surface)
     end
 
     function SUBDEV:OnRemoved()
-        AllScreens[self.AllScreensI] = nil
         self.Surface:Free()
     end
 
+    function SUBDEV:RenderObjectAdd(type, params)
+        return self.Surface:RenderObjectAdd(type, params)
+    end
 
+    function SUBDEV:RenderObjectUpdated(object_index)
+        self.Surface:RenderObjectUpdated(object_index)
+    end
+
+    function SUBDEV:RenderObjectRemove(object_index)
+        self.Surface:RenderObjectRemove(object_index)
+    end
 
     ArhComp.SubDevice.RegisterType("screen", SUBDEV)
 end
