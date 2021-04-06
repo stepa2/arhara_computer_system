@@ -60,6 +60,9 @@ ArhComp.RegisterDevice(bit.bor(
                 Angle = TransformAngle(Angle(312, 0, 0)), --Angle( 313.75, 357.39, 0 ):Up():Angle(),
                 Size = { X = 26, Y = 5.4 },
                 SurfPixelPerWorld = 16--16
+            },
+            program_runner = {
+                Type = "program_runner"
             }
         }
 })
