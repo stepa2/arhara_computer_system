@@ -120,16 +120,18 @@ function NETSEND:AddToQueue(object_type, object, receiver)
 end
 
 
-
+-- Returns true if there is no more objects
 function NETSEND:SendOnce(receiver)
     local pending_objects = self.PendingSendObjects[receiver]
 
-    if pending_objects == nil then return end
+    if pending_objects == nil then return false end
 
     local send_indices = {}
     local cur_size = OBJECT_COUNT_BITS
 
     local type_bits = self.TypeConfig.TypeBits
+
+    local any_objects_left = false 
     
     for i, v in ipairs(pending_objects) do
         local this_type = self.TypeConfig[v.Type]
@@ -137,7 +139,12 @@ function NETSEND:SendOnce(receiver)
 
         local new_size = cur_size + type_bits + this_size
 
-        if new_size >= MAX_SIZE or i > MAX_OBJECT_COUNT then break end
+        if not v.NeedsSend then continue end
+
+        if new_size >= MAX_SIZE or #send_indices > MAX_OBJECT_COUNT then 
+            any_objects_left = true
+            break 
+        end
         cur_size = new_size
 
         send_indices[#send_indices + 1] = i
@@ -148,12 +155,24 @@ function NETSEND:SendOnce(receiver)
     for _, i in ipairs(send_indices) do
         local object = pending_objects[i]
         net.WriteUInt(object.Type - 1, type_bits)
-        self.TypeConfig[object.Type].SendFn(object)
+        self.TypeConfig[object.Type].SendFn(object.Data)
+        object.NeedsSend = false
     end
 
     if receiver == NetQueue.NETWORK_TARGET_SERVER then
         net.SendToServer()
     else
         net.Send(receiver)
+    end
+
+    return any_objects_left
+end
+
+function NETSEND:SendAllNow()
+    for recv, objects in pairs(PendingSendObjects) do
+        while self:SendOnce(recv) do
+            -- Nothing, SendOnce does the job
+            local dummy = nil -- This silences lualint warning
+        end
     end
 end

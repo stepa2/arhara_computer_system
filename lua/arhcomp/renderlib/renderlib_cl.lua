@@ -72,20 +72,18 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
         surf.Pos = net.ReadVector()
         surf.Angle = net.ReadAngle()
         surf.SurfSize = {
-            X = net.ReadUInt(16)/100,
-            Y = net.ReadUInt(16)/100
+            X = net.ReadUInt(16) / 100,
+            Y = net.ReadUInt(16) / 100
         }
         surf.SurfPixelPerWorld = net.ReadUInt(8)
         surf.SurfPixelScale = 1 / surf.SurfPixelPerWorld
 
         surf.DrawSurfTemplateName = net.ReadString()
 
-        local drawSurf = AllocateSurface(surf.DrawSurfTemplateName, surf.SurfSize)
+        local drawSurf = GetOrAllocateSurface(surf.DrawSurfTemplateName, surf.SurfSize)
         drawSurf.Used = true
 
         surf.DrawSurface = drawSurf
-
-        PrintTable(surf)
     else
         assert(surf ~= nil)
         surf.DrawSurface.Used = false

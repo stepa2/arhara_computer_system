@@ -10,8 +10,6 @@ if SERVER then
             SurfSize = params.Size,
             SurfPixelPerWorld = params.SurfPixelPerWorld
         })
-
-        PrintTable(self.Surface)
     end
 
     function SUBDEV:OnRemoved()
