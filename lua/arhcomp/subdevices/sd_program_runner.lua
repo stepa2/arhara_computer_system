@@ -5,11 +5,11 @@ if SERVER then
         timer.Simple(1, function()
             local screen = ArhComp.SubDevice.GetByTypeAndName(self.Device, "screen", "screen")
 
-            local obj = screen:RenderObjectAdd("polygon", { Vertexes = {
-                { x = 16, y = 16 },
-                { x = 16, y = 48 },
-                { x = 48, y = 48}
-            }, Color = Color(0, 255, 0)})
+            local obj = screen:RenderObjectAddPolygon({
+                { X = 16, Y = 16, Color = Color(255, 0, 0) },
+                { X = 16, Y = 48, Color = Color(0, 255, 0) },
+                { X = 48, Y = 48, Color = Color(0, 0, 255) }
+            }, nil) -- Material
 
         end)
     end

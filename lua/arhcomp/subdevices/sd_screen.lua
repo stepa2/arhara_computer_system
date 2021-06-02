@@ -16,12 +16,8 @@ if SERVER then
         self.Surface:Free()
     end
 
-    function SUBDEV:RenderObjectAdd(type, params)
-        return self.Surface:RenderObjectAdd(type, params)
-    end
-
-    function SUBDEV:RenderObjectUpdated(object_index)
-        self.Surface:RenderObjectUpdated(object_index)
+    function SUBDEV:RenderObjectAddPolygon(vertexes, material)
+        return self.Surface:RenderObjectAddPolygon(type, params)
     end
 
     function SUBDEV:RenderObjectRemove(object_index)

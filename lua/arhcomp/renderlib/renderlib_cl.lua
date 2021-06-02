@@ -18,8 +18,8 @@ local function AllocateSurfaceImpl(index, templateName, size)
 
     local rtName = "arhcomp_rt_" .. templateName .. "_inst_" .. tostring(index)
 
-    local rt = GetRenderTargetEx(rtName,
-        size.X, size.Y, RT_SIZE_NO_CHANGE, MATERIAL_RT_DEPTH_NONE, 
+    local rt = GetRenderTargetEx(rtName, size.X, size.Y, 
+        RT_SIZE_LITERAL, MATERIAL_RT_DEPTH_NONE, 
         bit.bor(16, Either(opaque, 0, 8192), 32768),
         0, Either(opaque, IMAGE_FORMAT_RGB888, IMAGE_FORMAT_RGBA8888)) -- rtFlags, imageFormat
 
@@ -28,16 +28,16 @@ local function AllocateSurfaceImpl(index, templateName, size)
 
     local mat = CreateMaterial(rtName, shader, matTableFactory(rtName))
 
-    return mat
+    return { Material = mat, Texture = rt }
 end
 
 local function AllocateSurface(templateName, size)
     local put_to = AllocatedSurfaces[templateName] or {}
     local index = #put_to + 1
 
-    local material = AllocateSurfaceImpl(index, templateName, size)
+    local surf = AllocateSurfaceImpl(index, templateName, size)
 
-    local surf = { Material = material, Used = false }
+    surf.Used = false
 
     put_to[index] = surf
 
@@ -80,7 +80,12 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
 
         surf.DrawSurfTemplateName = net.ReadString()
 
-        local drawSurf = GetOrAllocateSurface(surf.DrawSurfTemplateName, surf.SurfSize)
+        surf.TextureSize = {
+            X = math.floor(surf.SurfSize.X * surf.SurfPixelPerWorld),
+            Y = math.floor(surf.SurfSize.Y * surf.SurfPixelPerWorld)
+        }
+
+        local drawSurf = GetOrAllocateSurface(surf.DrawSurfTemplateName, surf.TextureSize)
         drawSurf.Used = true
 
         surf.DrawSurface = drawSurf
@@ -93,9 +98,11 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
     ServerSurfaces[index] = surf
 end)
 
-local ColorRed = Color(255,0,0)
-local ColorGreen = Color(0,255,0)
-local ColorBlue = Color(0,0,255)
+local function DrawSurface(surface)
+
+end
+
+local ColorWhite = Color(255,255,255)
 
 hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", function(is_depth, is_skybox)
     if --[[is_depth or]] is_skybox then return end
@@ -114,10 +121,19 @@ hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", funct
         local sizeX = surf.SurfSize.X * ratio
         local sizeY = surf.SurfSize.Y * ratio
 
+        render.PushRenderTarget(surf.DrawSurface.Texture)
+            cam.Start2D()
+                render.Clear(0,0,0,255) -- Clear depth
+
+                DrawSurface(surf)
+            cam.End2D()
+        render.PopRenderTarget()
+
+
         cam.Start3D2D(pos, ang, scale)
-            surface.SetDrawColor(255,255,255,255)
+            surface.SetDrawColor(ColorWhite)
             surface.SetMaterial(surf.DrawSurface.Material)
-            surface.DrawRect(0,0, sizeX, sizeY)
+            surface.DrawTexturedRect(0,0, sizeX, sizeY)
         cam.End3D2D()
     end
 end)

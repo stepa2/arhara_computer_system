@@ -1,6 +1,5 @@
 -- See renderlib.lua top comment
 
-util.AddNetworkString("ArhComp_SurfaceContentsUpdate")
 util.AddNetworkString("ArhComp_SurfaceVisibilityUpdate")
 
 local arhcomp_surface_render_range_sv = CreateConVar("arhcomp_surface_render_range_sv", "2048", FCVAR_ARCHIVE,
@@ -9,10 +8,12 @@ local arhcomp_surface_render_range_sv = CreateConVar("arhcomp_surface_render_ran
 local LiveSurfaces = {}
 local LiveRenderDevices = {}
 
+
 local SURF = {}
 
 function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
     local index = #LiveSurfaces + 1
+    assert(index < 16777215, "Too many surfaces active")
 
     local template
 
@@ -28,7 +29,6 @@ function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
         Index = index,
         ObserversRev = {},
         Params = params,
-        RenderObjects = {},
     }, {__index = SURF})
 
     LiveSurfaces[index] = surf
@@ -40,7 +40,7 @@ end
 
 
 
-function SURF:UpdateObservers(plysRev, force)
+function SURF:UpdateObservers(plysRev)
     local combined = {}
 
     for ply, _ in pairs(self.ObserversRev) do
@@ -74,15 +74,6 @@ function SURF:UpdateObservers(plysRev, force)
                 end
             net.Send(ply)
         end
-
-        if curHas then
-            net.Start("ArhComp_SurfaceContentsUpdate")
-                net.WriteUInt(self.Index, 24) -- Max 16777215
-                
-                -- TODO:
-            net.Send(ply)
-        end
-
     end
 
     self.ObserversRev = plysRev
@@ -95,8 +86,8 @@ hook.Add("Think", "ArhComp_Surface_Think", function()
     local maxDist = arhcomp_surface_render_range_sv:GetFloat()
     local maxDistSqr = maxDist * maxDist
 
+    local surfacesToPlysRev = {}
     local surfacesToPlys = {}
-
 
     for iply, ply in ipairs(players) do
         local plyPos = ply:GetPos()
@@ -108,54 +99,23 @@ hook.Add("Think", "ArhComp_Surface_Think", function()
                 and ply:TestPVS(device) then
 
                 for isurf, surf in pairs(surfaces) do
+                    surfacesToPlysRev[surf] = surfacesToPlysRev[surf] or {}
+                    surfacesToPlysRev[surf][ply] = true
+                
                     surfacesToPlys[surf] = surfacesToPlys[surf] or {}
-                    surfacesToPlys[surf][ply] = true
+                    table.insert(surfacesToPlys[surf], ply)
                 end
             end
         end
     end
 
     for surfi, surf in pairs(LiveSurfaces) do
-        surf:UpdateObservers(surfacesToPlys[surf] or {})
+        surf:UpdateObservers(surfacesToPlysRev[surf] or {})
     end
+
+    -- TODO
 
 end)
-
-function SURF:RenderObjectAdd(type, params)
-    local index = #self.RenderObjects + 1
-
-    local data = {
-        Type = type,
-        Params = params,
-        Index = index,
-        Dirty = true, -- Needs networking
-        ToRemove = false -- Needs removal
-    }
-
-    self.RenderObjects[index] = data
-
-    return data
-end
-
-function SURF:RenderObjectUpdated(object_index)
-    if istable(object_index) then
-        object_index = object_index.Index
-    end
-
-    local object = self.RenderObjects[object_index]
-    object.Dirty = true
-end
-
-function SURF:RenderObjectRemove(object_index)
-    if istable(object_index) then
-        object_index = object_index.Index
-    end
-
-    local object = self.RenderObjects[object_index]
-    object.Dirty = true
-    object.ToRemove = true
-
-end
 
 function SURF:Free()
     LiveSurfaces[self.Index] = nil
