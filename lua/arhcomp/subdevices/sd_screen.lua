@@ -16,12 +16,20 @@ if SERVER then
         self.Surface:Free()
     end
 
-    function SUBDEV:RenderObjectAddPolygon(vertexes, material)
-        return self.Surface:RenderObjectAddPolygon(type, params)
+    -- if oldObj is not nil, oldObj will be replaced with this object
+    -- vertexes are array of { X = number, Y = number, U = number, V = number}
+    -- material can be nil
+    function SUBDEV:RenderObjectAddPolygon(vertexes, color, material, oldObj)
+        return self.Surface:RenderObjectAddPolygon(vertexes, color, material, oldObj)
     end
 
-    function SUBDEV:RenderObjectRemove(object_index)
-        self.Surface:RenderObjectRemove(object_index)
+    -- if oldObj is not nil, oldObj will be replaced with this object
+    function SUBDEV:RenderObjectAddText(pos, color, text, font, oldObj)
+        return self.Surface:RenderObjectAddText(pos, color, text, font, oldObj)
+    end
+
+    function SUBDEV:RenderObjectRemove(object)
+        self.Surface:RenderObjectRemove(object)
     end
 
     ArhComp.SubDevice.RegisterType("screen", SUBDEV)

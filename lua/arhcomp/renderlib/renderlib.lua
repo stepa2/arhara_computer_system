@@ -7,8 +7,6 @@ AddCSLuaFile("renderlib_cl.lua")
 
 ArhComp.RenderLib = {}
 
-ArhComp.RenderLib.MATERIAL_TEMPLATE_RT_PACEHOLDER = "!!render_target_placeholder!!"
-
 include("renderlib_objects.lua")
 
 if CLIENT then

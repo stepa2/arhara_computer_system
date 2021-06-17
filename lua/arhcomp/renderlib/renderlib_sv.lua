@@ -31,14 +31,14 @@ function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
         Params = params,
     }, {__index = SURF})
 
+    surf.Manager = ArhComp.RenderObj.CreateManager(index)
+
     LiveSurfaces[index] = surf
     LiveRenderDevices[device] = LiveRenderDevices[device] or {}
     LiveRenderDevices[device][index] = surf
 
     return surf
 end
-
-
 
 function SURF:UpdateObservers(plysRev)
     local combined = {}
@@ -79,6 +79,33 @@ function SURF:UpdateObservers(plysRev)
     self.ObserversRev = plysRev
 end
 
+-- if oldObj is not nil, oldObj will be replaced with this object
+-- vertexes are array of { X = number, Y = number, U = number, V = number}
+-- material can be nil
+function SURF:RenderObjectAddPolygon(vertexes, color, material, oldObj)
+    return self.Manager:AddOrReplaceObject({
+        Type = "poly",
+        Vertexes = vertexes,
+        Color = color,
+        Material = material
+    }, oldObj)
+end
+
+-- if oldObj is not nil, oldObj will be replaced with this object
+function SURF:RenderObjectAddText(pos, color, text, font, oldObj)
+    return self.Manager:AddOrReplaceObject({
+        Type = "text",
+        Position = pos,
+        Color = color,
+        Text = text,
+        Font = font
+    }, oldObj)
+end
+
+function SURF:RenderObjectRemove(object)
+    return self.Manager:RemoveObject(object)
+end
+
 hook.Add("Think", "ArhComp_Surface_Think", function()
     local devices = LiveRenderDevices
     local players = player.GetHumans()
@@ -99,18 +126,27 @@ hook.Add("Think", "ArhComp_Surface_Think", function()
                 and ply:TestPVS(device) then
 
                 for isurf, surf in pairs(surfaces) do
-                    surfacesToPlysRev[surf] = surfacesToPlysRev[surf] or {}
-                    surfacesToPlysRev[surf][ply] = true
+                    local plysRev = surfacesToPlysRev[surf.Index] or {}
+                    plysRev[ply] = true
+
+                    surfacesToPlysRev[surf.Index] = plysRev
                 
-                    surfacesToPlys[surf] = surfacesToPlys[surf] or {}
-                    table.insert(surfacesToPlys[surf], ply)
+                    local plys = surfacesToPlys[surf.Index] or {}
+                    plys[#plys + 1] = ply
+
+                    surfacesToPlys[surf.Index] = plys
                 end
             end
         end
     end
 
     for surfi, surf in pairs(LiveSurfaces) do
-        surf:UpdateObservers(surfacesToPlysRev[surf] or {})
+        surf:UpdateObservers(surfacesToPlysRev[surf.Index] or {})
+
+        local observers = surfacesToPlys[surf.Index]
+        if observers then
+            surf.Manager:DoNetworking(observers)
+        end
     end
 
     -- TODO
@@ -126,5 +162,6 @@ function SURF:Free()
         LiveRenderDevices[self.Device] = nil
     end
 
+    self.Manager:Free()
     self:UpdateObservers({})
 end

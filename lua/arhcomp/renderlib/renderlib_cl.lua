@@ -85,6 +85,8 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
             Y = math.floor(surf.SurfSize.Y * surf.SurfPixelPerWorld)
         }
 
+        surf.Index = index
+
         local drawSurf = GetOrAllocateSurface(surf.DrawSurfTemplateName, surf.TextureSize)
         drawSurf.Used = true
 
@@ -92,18 +94,48 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
     else
         assert(surf ~= nil)
         surf.DrawSurface.Used = false
+        
+        if surf.Manager then
+            surf.Manager:Free()
+        end
+
         surf = nil
     end
 
     ServerSurfaces[index] = surf
 end)
 
-local function DrawSurface(surface)
+local function DrawSurface(surf)
+    surf.Manager = surf.Manager or ArhComp.RenderObj.GetOrCreateManager(surf.Index)
+
+    local objectsByOid = surf.Manager:GetObjectsByOId()
+
+    for oid, object in pairs(objectsByOid) do
+        if object.Type == "text" then
+            draw.DrawText(
+                object.Text,
+                object.Font,
+                object.Pos.X,
+                object.Pos.Y,
+                object.Color
+            )
+        elseif object.Type == "poly" then
+            surface.SetDrawColor(object.Color)
+
+            local material = object.Material
+            if material then
+                surface.SetMaterial(material)
+            else
+                draw.NoTexture()
+            end
+
+            surface.DrawPoly(object.Vertexes)
+        end
+    end
 
 end
 
 local ColorWhite = Color(255,255,255)
-
 hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", function(is_depth, is_skybox)
     if --[[is_depth or]] is_skybox then return end
 
@@ -123,7 +155,7 @@ hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", funct
 
         render.PushRenderTarget(surf.DrawSurface.Texture)
             cam.Start2D()
-                render.Clear(0,0,0,255) -- Clear depth
+                render.Clear(0,0,0,255)
 
                 DrawSurface(surf)
             cam.End2D()
