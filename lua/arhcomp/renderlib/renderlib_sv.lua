@@ -73,6 +73,10 @@ function SURF:UpdateObservers(plysRev)
                     net.WriteString(self.Template.Name)
                 end
             net.Send(ply)
+
+            if curHas then
+                self.Manager:InvalidatePlayer(ply)
+            end
         end
     end
 
@@ -163,5 +167,6 @@ function SURF:Free()
     end
 
     self.Manager:Free()
+    self.Manager = nil
     self:UpdateObservers({})
 end

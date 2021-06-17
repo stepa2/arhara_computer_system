@@ -86,6 +86,7 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
         }
 
         surf.Index = index
+        surf.Manager = ArhComp.RenderObj.GetOrCreateManager(index)
 
         local drawSurf = GetOrAllocateSurface(surf.DrawSurfTemplateName, surf.TextureSize)
         drawSurf.Used = true
@@ -97,6 +98,7 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
         
         if surf.Manager then
             surf.Manager:Free()
+            surf.Manager = nil
         end
 
         surf = nil
@@ -106,8 +108,6 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
 end)
 
 local function DrawSurface(surf)
-    surf.Manager = surf.Manager or ArhComp.RenderObj.GetOrCreateManager(surf.Index)
-
     local objectsByOid = surf.Manager:GetObjectsByOId()
 
     for oid, object in pairs(objectsByOid) do

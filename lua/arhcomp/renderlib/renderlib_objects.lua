@@ -48,8 +48,6 @@ function MANAGER:GetObjectsByOId()
     return self.ObjectByObjectId
 end
 
-local InvalidateObject
-
 if SERVER then
 
 local function InvalidateObject(manager, object)
@@ -98,6 +96,9 @@ hook.Add("PlayerDisconnected", "ArhComp_PlyDisconnected", function(ply)
     end
 end)
 
+function MANAGER:InvalidatePlayer(ply)
+    self.IsActualByObjectIdByPlayer[ply] = {}
+end
 
 end
 
