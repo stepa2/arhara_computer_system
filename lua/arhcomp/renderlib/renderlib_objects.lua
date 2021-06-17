@@ -169,10 +169,12 @@ local function ActualizeSurfaceDataForPlayer(manager, ply)
         end
     end
 
-    SendSurfaceData(manager.SurfIndex, nonActualObjects, ply) -- TODO: send objects using queue
+    if not table.IsEmpty(nonActualObjects) then
+        SendSurfaceData(manager.SurfIndex, nonActualObjects, ply) -- TODO: send objects using queue
 
-    for _, obj in ipairs(nonActualObjects) do
-        isActualByObjectId[obj.ObjectId] = true
+        for _, obj in ipairs(nonActualObjects) do
+            isActualByObjectId[obj.ObjectId] = true
+        end
     end
 end
 
