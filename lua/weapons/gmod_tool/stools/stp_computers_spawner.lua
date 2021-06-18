@@ -1,17 +1,17 @@
 AddCSLuaFile()
 
-TOOL.Name = "ArhComp Spawner"
+TOOL.Name = "STPComputers Spawner"
 TOOL.ClientConVar = {
     devname = ""
 }
 
 local function SetSpawnedDevice(device)
-    RunConsoleCommand("arhcomp_spawner_devname", device.Name)
+    RunConsoleCommand("stp_computers_spawner_devname", device.Name)
 end
 
 function TOOL:GetSpawnedDevice()
     local name = self:GetClientInfo("devname")
-    return name ~= "" and ArhComp.GetDeviceConfigsByName(name) or nil
+    return name ~= "" and STPC.GetDeviceConfigsByName(name) or nil
 end
 
 function TOOL.BuildCPanel(panel)
@@ -21,14 +21,14 @@ function TOOL.BuildCPanel(panel)
     IconLayout:SetSpaceX(5)
     IconLayout:SetSpaceY(5)
 
-    for capname, cap in pairs(ArhComp.DeviceCapabilities) do
+    for capname, cap in pairs(STPC.DeviceCapabilities) do
         local Label = vgui.Create("DLabel")
         Label.OwnLine = true
         Label:SetText(capname)
 
         IconLayout:Add(Label)
 
-        for i, device in ipairs(ArhComp.GetDeviceConfigsByCapability(cap)) do
+        for i, device in ipairs(STPC.GetDeviceConfigsByCapability(cap)) do
             if device.PrimaryCapability ~= cap then continue end
 
             local model = device.Model
@@ -57,7 +57,7 @@ function TOOL:LeftClick(trace)
         return false
     end
 
-    local entity = ents.Create("arhcomp_device")
+    local entity = ents.Create("stpc_device")
 
     entity:SetPos(trace.HitPos + Vector(0,0,entity:OBBMins().z))
 
@@ -66,7 +66,7 @@ function TOOL:LeftClick(trace)
     entity:Spawn()
     entity:Activate()
 
-    undo.Create("ArhComp device")
+    undo.Create("STPComputers device")
     do
         undo.AddEntity(entity)
         undo.SetPlayer(self:GetOwner())

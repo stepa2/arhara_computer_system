@@ -3,7 +3,7 @@
 local SurfTempToSTIndex = {}
 local STIndexToSurfTemp = {}
 
-function ArhComp.RenderLib.ImplCl_RegisterSurfaceTemplate(templateName, template)
+function STPC.RenderLib.ImplCl_RegisterSurfaceTemplate(templateName, template)
     SurfTempToSTIndex[template] = templateName
     STIndexToSurfTemp[templateName] = template
 end
@@ -16,7 +16,7 @@ local function AllocateSurfaceImpl(index, templateName, size)
     local template = STIndexToSurfTemp[templateName]
     local opaque = templateName.Opaque
 
-    local rtName = "arhcomp_rt_" .. templateName .. "_inst_" .. tostring(index)
+    local rtName = "STPC_rt_" .. templateName .. "_inst_" .. tostring(index)
 
     local rt = GetRenderTargetEx(rtName, size.X, size.Y, 
         RT_SIZE_LITERAL, MATERIAL_RT_DEPTH_NONE, 
@@ -58,7 +58,7 @@ local function GetOrAllocateSurface(templateName, size)
     return AllocateSurface(templateName, size)
 end
 
-net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
+net.Receive("STPC_SurfaceVisibilityUpdate", function(len)
     local index = net.ReadUInt(24)
     local is_visible = net.ReadBool()
 
@@ -86,7 +86,7 @@ net.Receive("ArhComp_SurfaceVisibilityUpdate", function(len)
         }
 
         surf.Index = index
-        surf.Manager = ArhComp.RenderObj.GetOrCreateManager(index)
+        surf.Manager = STPC.RenderObj.GetOrCreateManager(index)
 
         local drawSurf = GetOrAllocateSurface(surf.DrawSurfTemplateName, surf.TextureSize)
         drawSurf.Used = true
@@ -136,7 +136,7 @@ local function DrawSurface(surf)
 end
 
 local ColorWhite = Color(255,255,255)
-hook.Add("PostDrawOpaqueRenderables", "ArhComp_PostDrawOpaqueRenderables", function(is_depth, is_skybox)
+hook.Add("PostDrawOpaqueRenderables", "STPC_PostDrawOpaqueRenderables", function(is_depth, is_skybox)
     if --[[is_depth or]] is_skybox then return end
 
 

@@ -3,7 +3,7 @@ if SERVER then
 
     function SUBDEV:OnCreated(params)
         timer.Simple(1, function()
-            local screen = ArhComp.SubDevice.GetByTypeAndName(self.Device, "screen", "screen")
+            local screen = STPC.SubDevice.GetByTypeAndName(self.Device, "screen", "screen")
 
             local obj = screen:RenderObjectAddPolygon({
                 { X = 16, Y = 16, U = 0, V = 0 },
@@ -17,6 +17,6 @@ if SERVER then
     function SUBDEV:OnRemoved()
     end
 
-    ArhComp.SubDevice.RegisterType("program_runner", SUBDEV)
+    STPC.SubDevice.RegisterType("program_runner", SUBDEV)
 
 end

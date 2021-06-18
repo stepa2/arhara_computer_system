@@ -1,8 +1,8 @@
 -- See renderlib.lua top comment
 
-util.AddNetworkString("ArhComp_SurfaceVisibilityUpdate")
+util.AddNetworkString("STPC_SurfaceVisibilityUpdate")
 
-local arhcomp_surface_render_range_sv = CreateConVar("arhcomp_surface_render_range_sv", "2048", FCVAR_ARCHIVE,
+local STPC_surface_render_range_sv = CreateConVar("STPC_surface_render_range_sv", "2048", FCVAR_ARCHIVE,
     "Range in which players can see surface contents", 64, nil) -- desc, min, max
 
 local LiveSurfaces = {}
@@ -11,7 +11,7 @@ local LiveRenderDevices = {}
 
 local SURF = {}
 
-function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
+function STPC.RenderLib.CreateSurface(device, templateIn, params)
     local index = #LiveSurfaces + 1
     assert(index < 16777215, "Too many surfaces active")
 
@@ -20,7 +20,7 @@ function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
     if istable(templateIn) then
         template = templateIn
     else
-        template = ArhComp.RenderLib.GetTemplateByName(templateIn)
+        template = STPC.RenderLib.GetTemplateByName(templateIn)
     end
 
     local surf = setmetatable({
@@ -31,7 +31,7 @@ function ArhComp.RenderLib.CreateSurface(device, templateIn, params)
         Params = params,
     }, {__index = SURF})
 
-    surf.Manager = ArhComp.RenderObj.CreateManager(index)
+    surf.Manager = STPC.RenderObj.CreateManager(index)
 
     LiveSurfaces[index] = surf
     LiveRenderDevices[device] = LiveRenderDevices[device] or {}
@@ -59,7 +59,7 @@ function SURF:UpdateObservers(plysRev)
         local curHas = data.Cur or false
 
         if prevHas ~= curHas then
-            net.Start("ArhComp_SurfaceVisibilityUpdate")
+            net.Start("STPC_SurfaceVisibilityUpdate")
                 net.WriteUInt(self.Index, 24) -- Max 16777215
                 net.WriteBool(curHas)
 
@@ -110,11 +110,11 @@ function SURF:RenderObjectRemove(object)
     return self.Manager:RemoveObject(object)
 end
 
-hook.Add("Think", "ArhComp_Surface_Think", function()
+hook.Add("Think", "STPC_Surface_Think", function()
     local devices = LiveRenderDevices
     local players = player.GetHumans()
 
-    local maxDist = arhcomp_surface_render_range_sv:GetFloat()
+    local maxDist = STPC_surface_render_range_sv:GetFloat()
     local maxDistSqr = maxDist * maxDist
 
     local surfacesToPlysRev = {}

@@ -1,4 +1,4 @@
-local SurfTemp_ScreenCombineSolid = ArhComp.RenderLib.RegisterSurfaceTemplate(
+local SurfTemp_ScreenCombineSolid = STPC.RenderLib.RegisterSurfaceTemplate(
     "screen_combine_solid", "UnlitTwoTexture", true, -- Opaque
     function(rt) return {
         ["$model"] = 1,
@@ -40,13 +40,13 @@ local function TransformAngle(angIn)
     return AxisX:AngleEx(AxisX:Cross(-AxisY))
 end
 
-ArhComp.RegisterDevice(bit.bor(
-    ArhComp.DeviceCapabilities.COMPUTER,
-    ArhComp.DeviceCapabilities.MONITOR,
-    ArhComp.DeviceCapabilities.KEYBOARD),
+STPC.RegisterDevice(bit.bor(
+    STPC.DeviceCapabilities.COMPUTER,
+    STPC.DeviceCapabilities.MONITOR,
+    STPC.DeviceCapabilities.KEYBOARD),
     {
         Name = "combine_interface_mid",
-        PrimaryCapability = ArhComp.DeviceCapabilities.COMPUTER,
+        PrimaryCapability = STPC.DeviceCapabilities.COMPUTER,
         Model = "models/props_combine/combine_interface002.mdl",
         SubDevices = {
             keyboard = {

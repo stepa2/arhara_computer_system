@@ -3,20 +3,20 @@ AddCSLuaFile()
 ENT.Type = "anim"
 ENT.Base = "base_anim"
 ENT.AutomaticFrameAdvance = true
-ENT.Category = "ArhComp"
+ENT.Category = "STPC"
 
 if SERVER then
     function ENT:InitFromConfig(config)
-        ArhComp.SubDevice.HostInit(self)
+        STPC.SubDevice.HostInit(self)
 
         self.SpawnConfig = config
         self:SetModel(config.Model)
 
-        ArhComp.SubDevice.HostConfigurateDevs(self, config.SubDevices)
+        STPC.SubDevice.HostConfigurateDevs(self, config.SubDevices)
     end
 
     function ENT:Use(activator)
-        local keyboard = ArhComp.SubDevice.GetSingleByType(self, "keyboard")
+        local keyboard = STPC.SubDevice.GetSingleByType(self, "keyboard")
     
         if keyboard then
             keyboard:OnHostUsed(activator)
@@ -24,11 +24,11 @@ if SERVER then
     end
     
     function ENT:OnRemove()
-        ArhComp.SubDevice.HostRemove(self)
+        STPC.SubDevice.HostRemove(self)
     end
 
     function ENT:Think()
-        for _, subdevs in pairs(ArhComp.SubDevice.GetAll(self)) do
+        for _, subdevs in pairs(STPC.SubDevice.GetAll(self)) do
             for _, subdev in pairs(subdevs) do
                 if subdev.OnThink then
                     subdev.OnThink()

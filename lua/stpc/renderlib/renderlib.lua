@@ -5,7 +5,7 @@
 AddCSLuaFile()
 AddCSLuaFile("renderlib_cl.lua")
 
-ArhComp.RenderLib = {}
+STPC.RenderLib = {}
 
 include("renderlib_objects.lua")
 
@@ -18,7 +18,7 @@ end
 
 local SurfaceTemplates = {}
 
-function ArhComp.RenderLib.RegisterSurfaceTemplate(templateName, shader, opaque, matFactory)
+function STPC.RenderLib.RegisterSurfaceTemplate(templateName, shader, opaque, matFactory)
    local template = {
       Shader = shader,
       MaterialTableFactory = matFactory,
@@ -29,12 +29,12 @@ function ArhComp.RenderLib.RegisterSurfaceTemplate(templateName, shader, opaque,
    SurfaceTemplates[templateName] = template
 
    if CLIENT then
-      ArhComp.RenderLib.ImplCl_RegisterSurfaceTemplate(templateName, template)
+      STPC.RenderLib.ImplCl_RegisterSurfaceTemplate(templateName, template)
    end
 
    return template
 end
 
-function ArhComp.RenderLib.GetTemplateByName(templateName)
+function STPC.RenderLib.GetTemplateByName(templateName)
    return SurfaceTemplates[templateName]
 end

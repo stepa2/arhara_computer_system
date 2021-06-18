@@ -11,6 +11,6 @@ if SERVER then
         print(ply, "used me!")
     end
 
-    ArhComp.SubDevice.RegisterType("keyboard", SUBDEV)
+    STPC.SubDevice.RegisterType("keyboard", SUBDEV)
 
 end

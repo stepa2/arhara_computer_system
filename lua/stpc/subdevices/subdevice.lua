@@ -1,5 +1,5 @@
 --[[
-    All ArhComp Devices are entities that contains set of SubDevices (e.g. screen, keyboard, programrunner)
+    All STPC Devices are entities that contains set of SubDevices (e.g. screen, keyboard, programrunner)
 
     SubDevice interface:
 
@@ -9,7 +9,7 @@
 AddCSLuaFile()
 
 local function LoadDeviceFiles()
-    local root = "arhcomp/subdevices/"
+    local root = "STPC/subdevices/"
 
     for i, filename in ipairs(file.Find(root .. "sd_*.lua","LUA")) do
         AddCSLuaFile(root .. filename)
@@ -20,7 +20,7 @@ end
 
 local Lib = {}
 
-ArhComp.SubDevice = Lib
+STPC.SubDevice = Lib
 
 if SERVER then
     local SubDeviceTypes = {}
@@ -28,7 +28,7 @@ if SERVER then
 -- Device (subdevice host) functions
 
     function Lib.HostInit(entity)
-        if not IsValid(entity) or entity:GetClass() ~= "arhcomp_device" then
+        if not IsValid(entity) or entity:GetClass() ~= "stpc_device" then
             return nil
         end
 
@@ -78,7 +78,7 @@ if SERVER then
     end
 
     function Lib.GetAll(entity)
-        if not IsValid(entity) or entity:GetClass() ~= "arhcomp_device" then
+        if not IsValid(entity) or entity:GetClass() ~= "stpc_device" then
             return nil
         end
 

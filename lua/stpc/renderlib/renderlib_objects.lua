@@ -1,16 +1,16 @@
 AddCSLuaFile()
 
-ArhComp.RenderObj = {}
+STPC.RenderObj = {}
 
 local ManagerBySurfaceId = {}
 
 if SERVER then
-    util.AddNetworkString("ArhComp_SurfaceData")
+    util.AddNetworkString("STPC_SurfaceData")
 end
 
 local MANAGER = {}
 
-function ArhComp.RenderObj.CreateManager(surfIndex)
+function STPC.RenderObj.CreateManager(surfIndex)
     assert(ManagerBySurfaceId[surfIndex] == nil, 
         "Render object manager for surface "..tostring(surfIndex).." is already created")
 
@@ -32,12 +32,12 @@ function ArhComp.RenderObj.CreateManager(surfIndex)
     return manager
 end
 
-function ArhComp.RenderObj.GetOrCreateManager(surfIndex)
+function STPC.RenderObj.GetOrCreateManager(surfIndex)
     if ManagerBySurfaceId[surfIndex] ~= nil then
         return ManagerBySurfaceId[surfIndex]
     end
 
-    return ArhComp.RenderObj.CreateManager(surfIndex)
+    return STPC.RenderObj.CreateManager(surfIndex)
 end
 
 function MANAGER:Free()
@@ -82,7 +82,7 @@ function MANAGER:RemoveObject(object)
 end
 
 gameevent.Listen("player_connect")
-hook.Add("player_connect", "ArhComp_PlyConnected", function(data)
+hook.Add("player_connect", "STPC_PlyConnected", function(data)
     local ply = Player(data.userid)
 
     for surfId, manager in pairs(ManagerBySurfaceId) do
@@ -90,7 +90,7 @@ hook.Add("player_connect", "ArhComp_PlyConnected", function(data)
     end
 end)
 
-hook.Add("PlayerDisconnected", "ArhComp_PlyDisconnected", function(ply)
+hook.Add("PlayerDisconnected", "STPC_PlyDisconnected", function(ply)
     for surfId, manager in pairs(ManagerBySurfaceId) do
         manager.IsActualByObjectIdByPlayer[ply] = nil
     end
@@ -135,7 +135,7 @@ local function SetObjectText(object)
 end
 
 local function SendSurfaceData(surfIndex, objectsData, ply)
-    net.Start("ArhComp_SurfaceData")
+    net.Start("STPC_SurfaceData")
         net.WriteUInt(surfIndex, 24)
         net.WriteUInt(#objectsData, 16)
 
@@ -269,9 +269,9 @@ if CLIENT then
         }
     end
 
-    net.Receive("ArhComp_SurfaceData", function()
+    net.Receive("STPC_SurfaceData", function()
         local surfaceId = net.ReadUInt(24)
-        local manager = ArhComp.RenderObj.GetOrCreateManager(surfaceId)
+        local manager = STPC.RenderObj.GetOrCreateManager(surfaceId)
 
         for i = 1, net.ReadUInt(16) do
             local objectTypeId = net.ReadUInt(2)

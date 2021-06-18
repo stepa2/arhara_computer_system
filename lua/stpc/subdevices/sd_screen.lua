@@ -3,7 +3,7 @@ if SERVER then
     local SUBDEV = {}
 
     function SUBDEV:OnCreated(params)
-        self.Surface = ArhComp.RenderLib.CreateSurface(self.Device, params.SurfaceTemplate, {
+        self.Surface = STPC.RenderLib.CreateSurface(self.Device, params.SurfaceTemplate, {
             Pos = params.Position,
             Angle = params.Angle,
             Opaque = params.Opaque,
@@ -32,5 +32,5 @@ if SERVER then
         self.Surface:RenderObjectRemove(object)
     end
 
-    ArhComp.SubDevice.RegisterType("screen", SUBDEV)
+    STPC.SubDevice.RegisterType("screen", SUBDEV)
 end

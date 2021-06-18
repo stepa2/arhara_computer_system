@@ -1,2 +1,2 @@
-# arhara_computer_system
+# STPComputers
 Working computers for garry's mod
